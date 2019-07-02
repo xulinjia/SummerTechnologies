@@ -1,0 +1,30 @@
+{
+  "$id": "5",
+  "AutoRefresh": true,
+  "AutoRefreshRemotes": true,
+  "CommitTextLinks": null,
+  "DraftCommitMsg": "",
+  "IncomingSavedCount": 0,
+  "LastCheckedRemotes": "0001-01-01T00:00:00",
+  "LastUsedView": 1,
+  "LogBranchFilterIndex": 0,
+  "OutgoingSavedCount": 0,
+  "RemoteProjectLinks": [
+    {
+      "$id": "6",
+      "BaseUrl": "https://bitbucket.org/Unity-Technologies/assetbundledemo",
+      "Identifier": "Unity-Technologies/assetbundledemo",
+      "RemoteName": "origin",
+      "Type": 1,
+      "Username": null,
+      "CloneUrl": "https://bitbucket.org/Unity-Technologies/assetbundledemo",
+      "DisplayName": "origin: https://bitbucket.org/Unity-Technologies/assetbundledemo"
+    }
+  ],
+  "SidebarExpandedItems": [
+    "文件状态",
+    "分支"
+  ],
+  "SidebarWidth": 210.0,
+  "SubtreeLinks": []
+}
