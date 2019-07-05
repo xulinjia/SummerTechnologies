@@ -67,6 +67,7 @@
     <Compile Include="Assets\AssetBundleSample\Scripts\LoadScenes.cs" />
     <Compile Include="Assets\AssetBundleSample\Scripts\LoadTanks.cs" />
     <Compile Include="Assets\AssetBundleSample\Scripts\LoadVariants.cs" />
+    <None Include="Assets\Shader\mt.shader" />
     <None Include="Assets\link.xml" />
     <None Include="Assets\Shader\OutLight.shader" />
     <Reference Include="Unity.TextMeshPro.Editor">

@@ -60,17 +60,12 @@ Shader "Custom/OutLight"
         }
 
     ENDCG
-    }
 
-    SubShader
-    {
-        Tags { "RenderType" = "Opaque" }
-        LOD 200
-         Pass
+            Pass
         {
-         Tags{ "LightMode" = "Always" }
+            Tags{ "LightMode" = "Always" }
             LOD 200
-            Blend Zero One
+            Blend  SrcAlpha One
             CGPROGRAM
             #pragma vertex vert
             #pragma fragment frag
@@ -78,21 +73,23 @@ Shader "Custom/OutLight"
             #include "UnityCG.cginc"
              struct v2f
             {
-            };
+                 float4 pos:SV_POSITION;
+                 float3 normal : NORMAL;
+             };
 
-            v2f vert(appdata_full IN)
-            {
+             v2f vert(appdata_full IN)
+             {
+                 v2f o;
+                 o.pos = UnityObjectToClipPos(IN.vertex);
+                 return o;
+             }
 
-            }
-
-            fixed4 frag(v2f IN) : SV_Target
-            {
-                return fixed4(1,0,0,0.5);
-            }
-            ENDCG
-
+             fixed4 frag(v2f IN) : COLOR
+             {
+                 return fixed4(1,0,0,1);
+             }
+             ENDCG
         }
     }
-    
     FallBack "Diffuse"
 }
