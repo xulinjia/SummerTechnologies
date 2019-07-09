@@ -73,19 +73,20 @@ Shader "Custom/OutLight"
             #include "UnityCG.cginc"
              struct v2f
             {
-                 float4 pos:SV_POSITION;
+                 float4 vertex:SV_POSITION;
                  float3 normal : NORMAL;
              };
 
              v2f vert(appdata_full IN)
              {
                  v2f o;
-                 o.pos = UnityObjectToClipPos(IN.vertex);
+                 o.vertex = UnityObjectToClipPos(IN.vertex) + float4(UnityObjectToWorldNormal(IN.normal) * 5,0);
                  return o;
              }
 
              fixed4 frag(v2f IN) : COLOR
              {
+
                  return fixed4(1,0,0,1);
              }
              ENDCG
