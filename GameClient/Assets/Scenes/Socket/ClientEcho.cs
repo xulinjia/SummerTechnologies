@@ -63,9 +63,29 @@ public class ClientEcho : MonoBehaviour
     public void Send()
     {
         string sendStr = InputField.text;
+        if (sendStr == null)
+        {
+            sendStr = "";
+        }
         byte[] sendBytes = System.Text.Encoding.Default.GetBytes(sendStr);
-        socket.Send(sendBytes);
-        Debug.Log("Socket Send" + sendStr);
+        for (int i = 0; i < 10000; i++)
+        {
+            socket.BeginSend(sendBytes, 0, sendBytes.Length, 0, SendCallback, socket);
+        }
+    }
+
+    public void SendCallback(IAsyncResult ar)
+    {
+        try
+        {
+            Socket scoket = (Socket)ar.AsyncState;
+            int count = socket.EndSend(ar);
+            Debug.Log("Socket Send" + count);
+        }
+        catch(Exception ex)
+        {
+
+        }
     }
 
     public void Update()

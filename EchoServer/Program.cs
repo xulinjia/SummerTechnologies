@@ -48,26 +48,33 @@ namespace EchoServer
 
         static void ReceiveCallback(IAsyncResult ar)
         {
-
-            ClientState state = (ClientState)ar.AsyncState;
-            Socket clientfd = state.socket;
-            int count = clientfd.EndReceive(ar);
-            if (count == 0)
+            try
             {
-                clientfd.Close();
-                clients.Remove(state.socket);
-                Console.WriteLine("SocketClose");
+                ClientState state = (ClientState)ar.AsyncState;
+                Socket clientfd = state.socket;
+                int count = clientfd.EndReceive(ar);
+                if (count == 0)
+                {
+                    clientfd.Close();
+                    clients.Remove(state.socket);
+                    Console.WriteLine("SocketClose");
+                }
+
+
+                string recvStr = System.Text.Encoding.Default.GetString(state.readBuff, 0, count);
+                Console.WriteLine("[服务器接收]" + recvStr);
+
+                //Send 
+                string sendStr = System.DateTime.Now.ToString();
+                byte[] sendByte = System.Text.Encoding.Default.GetBytes(sendStr);
+                clientfd.Send(sendByte);
+                Console.WriteLine("[服务器发送]" + sendStr);
+                clientfd.BeginReceive(state.readBuff, 0, 1024, 0, ReceiveCallback, state);
             }
-
-                 
-            string recvStr = System.Text.Encoding.Default.GetString(state.readBuff, 0, count);
-            Console.WriteLine("[服务器接收]" + recvStr);
-
-            //Send 
-            string sendStr = System.DateTime.Now.ToString();
-            byte[] sendByte = System.Text.Encoding.Default.GetBytes(sendStr);
-            clientfd.Send(sendByte);
-            Console.WriteLine("[服务器发送]" + sendStr);
+            catch(Exception ex)
+            {
+                Console.WriteLine("Socket Receive fail ", ex.ToString());
+            }
         }
     }
 }
