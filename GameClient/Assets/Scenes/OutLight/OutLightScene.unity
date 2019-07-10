@@ -293,6 +293,11 @@ PrefabInstance:
       propertyPath: m_Name
       value: Sphere
       objectReference: {fileID: 0}
+    - target: {fileID: 7153738837337904933, guid: d66a91c09ff77434f89cce8006d882d1,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 736854635021500697, guid: d66a91c09ff77434f89cce8006d882d1,
         type: 3}
       propertyPath: m_LocalPosition.x
