@@ -11,7 +11,7 @@ Shader "Custom/Glass"
     {
         Tags {"Queue" = "Transparent" "IgnoreProjector" = "True" "RenderType" = "Transparent" }
         LOD 200
-        //ZWrite Off
+        ZWrite Off
         Blend SrcAlpha OneMinusSrcAlpha
         CGPROGRAM
         // Physically based Standard lighting model, and enable shadows on all light types
