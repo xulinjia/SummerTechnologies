@@ -4,6 +4,8 @@ using UnityEngine;
 using UnityEngine.UI;
 using System.Net.Sockets;
 using System;
+using KcpProject;
+using Random = System.Random;
 
 public class ClientEcho : MonoBehaviour
 {
@@ -13,9 +15,14 @@ public class ClientEcho : MonoBehaviour
     public Button SendButton;
     public Text text;
 
-    Socket socket;
+    Socket mSocket;
     byte[] readBuff = new byte[1024];
     string recvStr = "";
+    private KCP mKCP = null;
+    const string ASIO_KCP_CONNECT_PACKET = "asio_kcp_connect_package get_conv";
+    const string ASIO_KCP_SEND_BACK_CONV_PACKET = "asio_kcp_connect_back_package get_conv:";
+    const string ASIO_KCP_DISCONNECT_PACKET = "asio_kcp_disconnect_packag";
+
     // Start is called before the first frame update
     void Start()
     {
@@ -25,8 +32,9 @@ public class ClientEcho : MonoBehaviour
 
     public void Connection()
     {
-        socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-        socket.BeginConnect("127.0.0.1", 8888, ConnectCallBack, socket);
+        mSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Udp);
+        mSocket.BeginConnect("127.0.0.1", 8888, ConnectCallBack, mSocket);
+        mKCP = new KCP((uint)(new Random().Next(1, Int32.MaxValue)), rawSend);
     }
 
     public void ConnectCallBack(IAsyncResult ar)
@@ -41,6 +49,7 @@ public class ClientEcho : MonoBehaviour
         catch(SocketException ex)
         {
             Debug.Log("Socket Receive fail:" + ex.ToString());
+            
         }
     }
 
@@ -68,9 +77,14 @@ public class ClientEcho : MonoBehaviour
             sendStr = "";
         }
         byte[] sendBytes = System.Text.Encoding.Default.GetBytes(sendStr);
-        for (int i = 0; i < 10000; i++)
+        mSocket.BeginSend(sendBytes, 0, sendBytes.Length, 0, SendCallback, mSocket);
+    }
+
+    private void rawSend(byte[] data, int length)
+    {
+        if (mSocket != null)
         {
-            socket.BeginSend(sendBytes, 0, sendBytes.Length, 0, SendCallback, socket);
+            mSocket.Send(data, length, SocketFlags.None);
         }
     }
 
@@ -79,7 +93,7 @@ public class ClientEcho : MonoBehaviour
         try
         {
             Socket scoket = (Socket)ar.AsyncState;
-            int count = socket.EndSend(ar);
+            int count = mSocket.EndSend(ar);
             Debug.Log("Socket Send" + count);
         }
         catch(Exception ex)
