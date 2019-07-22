@@ -62,7 +62,7 @@ namespace KcpProject
             var n = mKCP.Send(data, index, length);
 
             if (mKCP.WaitSnd >= mKCP.SndWnd || !WriteDelay) {
-                mKCP.Flush(false);
+                mKCP.Flush(true);
             }
             return n;
         }
