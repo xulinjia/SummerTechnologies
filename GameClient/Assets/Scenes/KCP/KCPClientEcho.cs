@@ -13,7 +13,7 @@ public class KCPClientEcho : MonoBehaviour
     public Button SendButton;
     public Text text;
 
-    KcpSession kcpSession;
+    Session kcpSession;
 
     void Start()
     {
@@ -32,19 +32,27 @@ public class KCPClientEcho : MonoBehaviour
         string str = InputField.text;
          for (int i = 0; i < 100000; i++)
          {
-            byte[] bs = System.Text.Encoding.UTF8.GetBytes(UnityEngine.Random.Range(0,100000000).ToString());
-            //byte[] bs = System.Text.Encoding.UTF8.GetBytes(str);
-            kcpSession.KcpSend(bs, 0, bs.Length);
+            byte[] bs = System.Text.Encoding.Default.GetBytes(UnityEngine.Random.Range(0,100000000).ToString());
+            kcpSession.Send(bs);
         }
     }
 
     public void OnDestroy()
     {
-        kcpSession.Dispose();
+        kcpSession.Close();
     }
 
+    byte[] b = new byte[1024];
     public void Update()
     {
-
+        if(kcpSession != null)
+        {
+            int n = kcpSession.Receive(b);
+            if(n > 0)
+            {
+                string str = System.Text.Encoding.Default.GetString(b, 0, n);
+                Debug.Log("Reveive  :"+str);
+            }
+        }
     }
 }

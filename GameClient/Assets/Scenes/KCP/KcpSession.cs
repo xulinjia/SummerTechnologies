@@ -7,10 +7,11 @@ using System.Net.Sockets;
 using KcpProject;
 using Random = System.Random;
 
-public class KcpSession 
+public class KcpSession : Session
 {
     private UInt32 mNextUpdateTime = 0;
     bool in_connect_stage_ = false;
+    bool connect_succeed_ = false;
     long lastConnectTime;
     private Socket mSocket = null;
     private KCP mKCP = null;
@@ -21,7 +22,7 @@ public class KcpSession
     System.Timers.Timer connectTimer;
     System.Timers.Timer updateTimer;
 
-    public void Dispose()
+    public override void Close()
     {
         if (connectTimer != null)
         {
@@ -33,9 +34,18 @@ public class KcpSession
             updateTimer.Stop();
             updateTimer.Dispose();
         }
+        if(mSocket != null)
+        {
+            mSocket.Close();
+        }
+
+        if(mKCP != null)
+        {
+            mKCP = null;
+        }
     }
 
-    public void Connect(string host,int port)
+    public override void Connect(string host,int port)
     {
         mRecvBuffer.Clear();
         var endpoint = IPAddress.Parse(host);
@@ -50,7 +60,6 @@ public class KcpSession
             Socket socket = (Socket)ar.AsyncState;
             socket.EndConnect(ar);
             in_connect_stage_ = true;
-            socket.BeginReceive(mRecvBuffer.RawBuffer, mRecvBuffer.WriterIndex, mRecvBuffer.WritableBytes,SocketFlags.None, ReveiveCallBack, socket);
             TryConnectKcp(this, null);
             connectTimer = new System.Timers.Timer(1000);
             connectTimer.Elapsed += new System.Timers.ElapsedEventHandler(TryConnectKcp);
@@ -62,7 +71,7 @@ public class KcpSession
             {
                 Update();
             });
-            updateTimer.Interval = 5;//毫秒 1秒=1000毫秒
+            updateTimer.Interval = 10;//毫秒 1秒=1000毫秒
             updateTimer.Enabled = true;//必须加上
             updateTimer.AutoReset = true;//执行一次 false，一直执行true 
             Debug.Log("Socket Connect Succ");
@@ -74,15 +83,87 @@ public class KcpSession
         }
     }
 
-    public void ReveiveCallBack(IAsyncResult ar)
+    private void SocketSend(byte[] sendBytes)
+    {
+        mSocket.BeginSend(sendBytes, 0, sendBytes.Length, SocketFlags.None, SendCallback, mSocket);
+    }
+
+    private void rawSend(byte[] data, int length)
+    {
+        if (mSocket != null)
+        {
+            mSocket.BeginSend(data, 0, length, 0, SendCallback, mSocket);
+            string str = System.Text.Encoding.UTF8.GetString(data);
+            Debug.Log("kcpSend Data -->" + str);
+        }
+    }
+
+    static int allCount = 0;
+    public void SendCallback(IAsyncResult ar)
     {
         try
         {
-            Socket socket = (Socket)ar.AsyncState;
-            int rn = socket.EndReceive(ar);
-            mRecvBuffer.WriterIndex += rn;
+            Socket mSocket = (Socket)ar.AsyncState;
+            int count = mSocket.EndSend(ar);
+            allCount += count;
+            Debug.Log("Socket Send -->" + count + ":" + allCount);
+
+        }
+        catch (Exception ex)
+        {
+
+        }
+    }
+
+    public override int Send(byte[] data)
+    {
+        if (mSocket == null)
+            return -1;
+        if (mKCP == null)
+            return -1;
+        if (mKCP.WaitSnd >= mKCP.SndWnd)
+        {
+            return 0;
+        }
+        mNextUpdateTime = 0;
+
+        var n = mKCP.Send(data);
+        if (mKCP.WaitSnd >= mKCP.SndWnd)
+        {
+            mKCP.Flush(true);
+        }
+        return n;
+    }
+
+    public override int Receive(byte[] data)
+    {
+        // 上次剩下的部分
+        if (mRecvBuffer.ReadableBytes > 0)
+        {
+            var recvBytes = Math.Min(mRecvBuffer.ReadableBytes, data.Length);
+            Buffer.BlockCopy(mRecvBuffer.RawBuffer, mRecvBuffer.ReaderIndex, data, 0, recvBytes);
+            mRecvBuffer.ReaderIndex += recvBytes;
+            // 读完重置读写指针
+            if (mRecvBuffer.ReaderIndex == mRecvBuffer.WriterIndex)
+            {
+                mRecvBuffer.Clear();
+            }
+            return recvBytes;
+        }
+
+        if (mSocket == null)
+            return -1;
+
+        if (!mSocket.Poll(0, SelectMode.SelectRead))
+        {
+            return 0;
+        }
+
+        var rn = 0;
+        try
+        {
+            rn = mSocket.Receive(mRecvBuffer.RawBuffer, mRecvBuffer.WriterIndex, mRecvBuffer.WritableBytes, SocketFlags.None);
             string str = System.Text.Encoding.UTF8.GetString(mRecvBuffer.RawBuffer);
-            Debug.Log("Reveive Socket :Count" + rn +"-->" + str);
             if (str.StartsWith(ASIO_KCP_SEND_BACK_CONV_PACKET))
             {
                 if (in_connect_stage_)
@@ -100,76 +181,27 @@ public class KcpSession
                 {
                     Debug.Log("ERROR：KCP 已经连接上了,重复的连接消息");
                 }
+                mRecvBuffer.Clear();
+                return 0;
             }
             else if (str.StartsWith(ASIO_KCP_DISCONNECT_PACKET))
             {
-
+                mRecvBuffer.Clear();
+                return 0;
             }
-            else
-            {
-                KcpReceive();
-            }
-            socket.BeginReceive(mRecvBuffer.RawBuffer, mRecvBuffer.WriterIndex, mRecvBuffer.WritableBytes, SocketFlags.None, ReveiveCallBack, socket);//继续接受后面的信息
         }
         catch (Exception ex)
         {
-            Debug.Log("Socket Receive fail:" + ex.ToString());
+            Console.WriteLine(ex.Message);
+            rn = -1;
         }
-    }
 
-    public void Send(byte[] sendBytes)
-    {
-        mSocket.BeginSend(sendBytes, 0, sendBytes.Length, SocketFlags.None, SendCallback, mSocket);
-    }
-
-    private void rawSend(byte[] data, int length)
-    {
-        if (mSocket != null)
+        if (rn <= 0)
         {
-            mSocket.BeginSend(data, 0, length, 0, SendCallback, mSocket);
-            string str = System.Text.Encoding.UTF8.GetString(data);
-            Debug.Log("kcpSend Data -->" + str);
+            return rn;
         }
-    }
+        mRecvBuffer.WriterIndex += rn;
 
-    public void SendCallback(IAsyncResult ar)
-    {
-        try
-        {
-            Socket mSocket = (Socket)ar.AsyncState;
-            int count = mSocket.EndSend(ar);
-            Debug.Log("Socket Send -->" + count);
-
-        }
-        catch (Exception ex)
-        {
-
-        }
-    }
-
-    public int KcpSend(byte[] data, int index, int length)
-    {
-        if (mSocket == null)
-            return -1;
-        if (mKCP == null)
-            return -1;
-        if (mKCP.WaitSnd >= mKCP.SndWnd)
-        {
-            return 0;
-        }
-        mNextUpdateTime = 0;
-
-        var n = mKCP.Send(data, index, length);
-        Debug.Log("kcpSend Count" + n);
-        if (mKCP.WaitSnd >= mKCP.SndWnd)
-        {
-            mKCP.Flush(true);
-        }
-        return n;
-    }
-
-    public int KcpReceive()
-    {
         var inputN = mKCP.Input(mRecvBuffer.RawBuffer, mRecvBuffer.ReaderIndex, mRecvBuffer.ReadableBytes, true, true);
         if (inputN < 0)
         {
@@ -179,7 +211,7 @@ public class KcpSession
         mRecvBuffer.Clear();
 
         // 读完所有完整的消息
-        while(true)
+        for (; ; )
         {
             var size = mKCP.PeekSize();
             if (size <= 0) break;
@@ -187,14 +219,15 @@ public class KcpSession
             mRecvBuffer.EnsureWritableBytes(size);
 
             var n = mKCP.Recv(mRecvBuffer.RawBuffer, mRecvBuffer.WriterIndex, size);
-
-            byte[] data = new byte[size];
-            Buffer.BlockCopy(mRecvBuffer.RawBuffer, mRecvBuffer.ReaderIndex, data, 0, data.Length);
-            mRecvBuffer.Clear();
-            string str = System.Text.Encoding.UTF8.GetString(data);
-            Debug.Log("kcpReceive Data -->" + str +"--->" + n);
+            if (n > 0) mRecvBuffer.WriterIndex += n;
         }
-        mRecvBuffer.Clear();
+
+        // 有数据待接收
+        if (mRecvBuffer.ReadableBytes > 0)
+        {
+            return Receive(data);
+        }
+
         return 0;
     }
 
@@ -215,7 +248,7 @@ public class KcpSession
             arr2[i] = arr[i];
         }
         arr2[arr2.Length - 1] = '\0';
-        Send(System.Text.Encoding.UTF8.GetBytes(arr2));
+        SocketSend(System.Text.Encoding.UTF8.GetBytes(arr2));
         Debug.Log("Send--Connect");
     }
 
