@@ -30,12 +30,12 @@ public class KCPClientEcho : MonoBehaviour
     public void SendTxt()
     {
         string str = InputField.text;
-//         for (int i = 0; i < 10; i++)
-//         {
-            //byte[] bs = System.Text.Encoding.UTF8.GetBytes(UnityEngine.Random.Range(0,100000000).ToString());
-            byte[] bs = System.Text.Encoding.UTF8.GetBytes(str);
+         for (int i = 0; i < 100000; i++)
+         {
+            byte[] bs = System.Text.Encoding.UTF8.GetBytes(UnityEngine.Random.Range(0,100000000).ToString());
+            //byte[] bs = System.Text.Encoding.UTF8.GetBytes(str);
             kcpSession.KcpSend(bs, 0, bs.Length);
-/*        }*/
+        }
     }
 
     public void OnDestroy()

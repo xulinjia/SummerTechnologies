@@ -4,5 +4,8 @@
 EditorBuildSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 2
-  m_Scenes: []
+  m_Scenes:
+  - enabled: 1
+    path: Assets/Scenes/KCP/EchoKCP.unity
+    guid: 8e5b09e20605e874d91fa56275bd2c60
   m_configObjects: {}

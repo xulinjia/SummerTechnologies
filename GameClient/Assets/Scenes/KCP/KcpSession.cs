@@ -62,7 +62,7 @@ public class KcpSession
             {
                 Update();
             });
-            updateTimer.Interval = 20;//毫秒 1秒=1000毫秒
+            updateTimer.Interval = 5;//毫秒 1秒=1000毫秒
             updateTimer.Enabled = true;//必须加上
             updateTimer.AutoReset = true;//执行一次 false，一直执行true 
             Debug.Log("Socket Connect Succ");

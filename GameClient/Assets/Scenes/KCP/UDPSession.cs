@@ -28,7 +28,7 @@ namespace KcpProject
             // fast:    0, 30, 2, 1
             // fast2:   1, 20, 2, 1
             // fast3:   1, 10, 2, 1
-            mKCP.NoDelay(0, 30, 2, 1);
+            mKCP.NoDelay(1, 5, 1, 1);
             mRecvBuffer.Clear();
         }
 
