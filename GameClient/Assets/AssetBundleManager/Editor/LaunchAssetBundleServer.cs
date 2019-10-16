@@ -117,7 +117,19 @@ namespace AssetBundles
             {
                 foldersWithApi[i] = foldersWithApi[i].Split(Path.DirectorySeparatorChar).Last();
                 foldersWithApi[i] = foldersWithApi[i].Split('-').First();
-
+                char[] chars = foldersWithApi[i].ToCharArray();
+                bool firstFlag = true;
+                for (int j = 0; j < chars.Length; j++)
+                {
+                    if(chars[j] == '.')
+                    {
+                        if (firstFlag)
+                            firstFlag = false;
+                        else
+                            chars[j] = 'x'; 
+                    }
+                }
+                foldersWithApi[i] =new string(chars).Replace("x","");
                 if (float.Parse(foldersWithApi[i]) > profileVersion)
                 {
                     profileVersion = float.Parse(foldersWithApi[i]);
