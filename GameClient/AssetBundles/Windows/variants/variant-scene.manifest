@@ -1,0 +1,41 @@
+ManifestFileVersion: 0
+CRC: 1263640277
+Hashes:
+  AssetFileHash:
+    serializedVersion: 2
+    Hash: f06ea1448cd06a87866f2062e14df498
+  TypeTreeHash:
+    serializedVersion: 2
+    Hash: da209653fe157a80781853b2af4931d5
+HashAppended: 0
+ClassTypes:
+- Class: 1
+  Script: {instanceID: 0}
+- Class: 4
+  Script: {instanceID: 0}
+- Class: 21
+  Script: {instanceID: 0}
+- Class: 23
+  Script: {instanceID: 0}
+- Class: 28
+  Script: {instanceID: 0}
+- Class: 33
+  Script: {instanceID: 0}
+- Class: 43
+  Script: {instanceID: 0}
+- Class: 48
+  Script: {instanceID: 0}
+- Class: 65
+  Script: {instanceID: 0}
+- Class: 104
+  Script: {instanceID: 0}
+- Class: 157
+  Script: {instanceID: 0}
+- Class: 212
+  Script: {instanceID: 0}
+- Class: 213
+  Script: {instanceID: 0}
+Assets:
+- Assets/AssetBundleSample/Assets/Variants/VariantScene.unity
+Dependencies:
+- E:/Work/SummerTechnologies/GameClient/AssetBundles/Windows/variants/myassets.hd

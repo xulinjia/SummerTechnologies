@@ -1,0 +1,37 @@
+ManifestFileVersion: 0
+CRC: 651515174
+Hashes:
+  AssetFileHash:
+    serializedVersion: 2
+    Hash: 13a5670b5d299577f103bffd37abadd7
+  TypeTreeHash:
+    serializedVersion: 2
+    Hash: b00529f6c30382d5ee82c43b988bb5fd
+HashAppended: 0
+ClassTypes:
+- Class: 1
+  Script: {instanceID: 0}
+- Class: 4
+  Script: {instanceID: 0}
+- Class: 21
+  Script: {instanceID: 0}
+- Class: 23
+  Script: {instanceID: 0}
+- Class: 28
+  Script: {instanceID: 0}
+- Class: 33
+  Script: {instanceID: 0}
+- Class: 43
+  Script: {instanceID: 0}
+- Class: 48
+  Script: {instanceID: 0}
+- Class: 64
+  Script: {instanceID: 0}
+- Class: 104
+  Script: {instanceID: 0}
+- Class: 157
+  Script: {instanceID: 0}
+Assets:
+- Assets/AssetBundleSample/Assets/TestScene.unity
+Dependencies:
+- E:/Work/SummerTechnologies/GameClient/AssetBundles/Windows/material-bundle
