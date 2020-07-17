@@ -6,6 +6,7 @@ Shader "Unlit/Warping"
         _NoiseTex("NoiseTexture",2D) = "white" {}
         _DistortTimeFactor("DistortTimeFactor",Range(0,1)) = 1
         _DistortStrength("DistortStrength",Range(0,1)) = 0.2
+        _UVLength("_UVLength",Range(0,1)) = 1
     }
     SubShader
     {
@@ -49,6 +50,7 @@ Shader "Unlit/Warping"
             float4 _NoiseTex_ST;
             float _DistortTimeFactor;
             float _DistortStrength;
+            float _UVLength;
 
             v2f vert (appdata v)
             {
